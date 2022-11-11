@@ -7,33 +7,18 @@
 # definition orange happy cube (hole upper right)
 # define square-parts-edge patterns from left to right and
 # top to bottom for all 6 cube square-parts
-# cube = {0: [[1,0,1,0,1],[1,1,0,1,1],[1,0,0,1,0],[0,1,0,1,1]],
-#         1: [[0,0,0,1,0],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0]],
-#         2: [[0,0,1,1,0],[0,0,1,0,0],[0,1,1,0,0],[0,0,1,0,0]],
-#         3: [[0,1,0,1,0],[0,1,1,0,0],[0,0,1,0,1],[1,1,0,1,0]],
-#         4: [[1,1,0,0,0],[0,1,0,1,0],[0,1,0,1,1],[1,0,1,0,1]],
-#         5: [[0,1,0,1,1],[1,0,1,0,1],[1,1,0,1,0],[0,0,1,0,0]]}
-
-# cube = {0: [[1,0,1,0,1],[1,1,0,1,0],[0,1,0,0,1],[1,1,0,1,1]],
-#         1: [[0,0,0,1,0],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0]],
-#         2: [[0,1,1,0,0],[0,0,1,0,0],[0,0,1,1,0],[0,0,1,0,0]],
-#         3: [[0,1,0,1,0],[0,1,0,1,1],[1,0,1,0,0],[0,0,1,1,0]],
-#         4: [[0,0,0,1,1],[1,0,1,0,1],[1,1,0,1,0],[0,1,0,1,0]],
-#         5: [[1,1,0,1,0],[0,0,1,0,0],[0,1,0,1,1],[1,0,1,0,1]]}
-
-# Orange Cube, nur Teilchen 2 geswappt: So funktioniert solver,
-# auch ohne die Funktion, teilchen umzudrehen
+# Orange Cube
 cube = {0: [[1, 0, 1, 0, 1], [1, 1, 0, 1, 1], [1, 0, 0, 1, 0], [0, 1, 0, 1, 1]],
-        1: [[0, 1, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0], [0, 1, 0, 1, 0]],
+        1: [[0, 0, 0, 1, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0]],
         2: [[0, 0, 1, 1, 0], [0, 0, 1, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 0]],
         3: [[0, 1, 0, 1, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 1], [1, 1, 0, 1, 0]],
         4: [[1, 1, 0, 0, 0], [0, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 0, 1, 0, 1]],
         5: [[0, 1, 0, 1, 1], [1, 0, 1, 0, 1], [1, 1, 0, 1, 0], [0, 0, 1, 0, 0]]}
 
-
 class Solution:
     tile_sequence = []
     tile_orient = []
+    tile_turnover = []
 
     # function to check, whether two edges fit into each other
     # pos_edge_1, pos_edge_2 are two 2-tuples with tile-id and
@@ -41,17 +26,29 @@ class Solution:
     # alt_dir = True per default, indicating, that the sequence
     # of edge-patterns have to be inverted on one component,
     # before comparison takes place
-    def check_edge_compatibility(self, pos_edge_1, pos_edge_2,
-                                 alt_dir=True):
+    def check_edge_compatibility(self, pos_edge_1, pos_edge_2, alt_dir=True):
         part_id_1 = self.tile_sequence[pos_edge_1[0]]
         part_id_2 = self.tile_sequence[pos_edge_2[0]]
         orient_part_1 = self.tile_orient[pos_edge_1[0]]
         orient_part_2 = self.tile_orient[pos_edge_2[0]]
+        turnover_part_1 = self.tile_turnover[pos_edge_1[0]]
+        turnover_part_2 = self.tile_turnover[pos_edge_2[0]]
         edge_id_1 = pos_edge_1[1]
         edge_id_2 = pos_edge_2[1]
 
-        edge_1_pattern = cube[part_id_1][(edge_id_1 + orient_part_1) % 4]
-        edge_2_pattern = cube[part_id_2][(edge_id_2 + orient_part_2) % 4]
+        if not turnover_part_1:
+            edge_1_pattern = cube[part_id_1][(edge_id_1 + orient_part_1) % 4]
+        else:
+            line_mapping = {0: 0, 1: 3, 2: 2, 3: 1}
+            edge_1_pattern = cube[part_id_1][line_mapping[(edge_id_1 + orient_part_1) % 4]]
+            edge_1_pattern.reverse()
+
+        if not turnover_part_2:
+            edge_2_pattern = cube[part_id_2][(edge_id_2 + orient_part_2) % 4]
+        else:
+            line_mapping = {0: 0, 1: 3, 2: 2, 3: 1}
+            edge_2_pattern = cube[part_id_2][line_mapping[(edge_id_2 + orient_part_2) % 4]]
+            edge_2_pattern.reverse()
 
         retval = True
         for i in range(5):
@@ -122,13 +119,15 @@ class Solution:
         if solution_pos_id > 0:
             self.tile_sequence.pop()
             self.tile_orient.pop()
+            self.tile_turnover.pop()
 
     # method to add a new tile to the solution
-    def add_tile(self, tile_id, orientation_id):
+    def add_tile(self, tile_id, orientation_id, turnover_id):
         if tile_id in self.tile_sequence:
             raise ValueError("cannot add tile which is already contained in solution!")
         self.tile_sequence.append(tile_id)
         self.tile_orient.append(orientation_id)
+        self.tile_turnover.append(turnover_id)
         if self.check_last_tile_valid():
             retval = True
         else:
@@ -145,23 +144,27 @@ class Solution:
 # to start from
 def solve_cube(cube, cur_sol: Solution):
     # get candidate tiles for future moves
-    print(cur_sol.tile_sequence)
+    # print(cur_sol.tile_sequence)
     cand_tiles = list(set(range(6)).difference(set(cur_sol.tile_sequence)))
     cand_tiles.sort()
+    turnovers = list(range(2))
     orientations = list(range(4))
     solved = False
     for cand_tile in cand_tiles:
         for orientation in orientations:
-            if cur_sol.add_tile(cand_tile, orientation):
-                if cur_sol.is_solved():
-                    solved = True
-                    break
-                else:
-                    solve_cube(cube, cur_sol)
+            for turnover in turnovers:
+                if cur_sol.add_tile(cand_tile, orientation, turnover):
                     if cur_sol.is_solved():
                         solved = True
                         break
-                cur_sol.drop_tile()
+                    else:
+                        solve_cube(cube, cur_sol)
+                        if cur_sol.is_solved():
+                            solved = True
+                            break
+                    cur_sol.drop_tile()
+            if solved:
+                break
         if solved:
             break
     return cur_sol
@@ -172,6 +175,7 @@ result = solve_cube(cube, cur_sol)
 output = ""
 print(cur_sol.tile_sequence)
 print(cur_sol.tile_orient)
+print(cur_sol.tile_turnover)
 for i in range(len(cur_sol.tile_sequence)):
     output = output + "Tile {} L{}, ".format(cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
 output = output[:-2]
