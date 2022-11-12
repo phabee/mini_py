@@ -8,17 +8,35 @@
 # define square-parts-edge patterns from left to right and
 # top to bottom for all 6 cube square-parts
 # Orange Cube
-cube = {0: [[1, 0, 1, 0, 1], [1, 1, 0, 1, 1], [1, 0, 0, 1, 0], [0, 1, 0, 1, 1]],
-        1: [[0, 0, 0, 1, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0]],
-        2: [[0, 0, 1, 1, 0], [0, 0, 1, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 0]],
-        3: [[0, 1, 0, 1, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 1], [1, 1, 0, 1, 0]],
-        4: [[1, 1, 0, 0, 0], [0, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 0, 1, 0, 1]],
-        5: [[0, 1, 0, 1, 1], [1, 0, 1, 0, 1], [1, 1, 0, 1, 0], [0, 0, 1, 0, 0]]}
+# cube = {0: [[1, 0, 1, 0, 1], [1, 1, 0, 1, 1], [1, 0, 0, 1, 0], [0, 1, 0, 1, 1]],
+#         1: [[0, 0, 0, 1, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0]],
+#         2: [[0, 0, 1, 1, 0], [0, 0, 1, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 0]],
+#         3: [[0, 1, 0, 1, 0], [0, 1, 1, 0, 0], [0, 0, 1, 0, 1], [1, 1, 0, 1, 0]],
+#         4: [[1, 1, 0, 0, 0], [0, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 0, 1, 0, 1]],
+#         5: [[0, 1, 0, 1, 1], [1, 0, 1, 0, 1], [1, 1, 0, 1, 0], [0, 0, 1, 0, 0]]}
+
+# Purple Cube
+cube = {0: [[0, 0, 1, 0, 1], [1, 1, 0, 1, 0], [0, 0, 0, 1, 1], [1, 1, 0, 1, 0]],
+        1: [[0, 0, 1, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0]],
+        2: [[0, 0, 1, 1, 1], [1, 0, 1, 0, 0], [0, 0, 1, 1, 1], [1, 0, 1, 1, 0]],
+        3: [[0, 0, 1, 0, 1], [1, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0]],
+        4: [[0, 0, 0, 1, 1], [1, 1, 0, 1, 1], [1, 0, 1, 0, 0], [0, 1, 0, 1, 0]],
+        5: [[0, 1, 0, 0, 0], [0, 1, 0, 1, 1], [1, 1, 1, 0, 0], [0, 0, 1, 0, 0]]}
 
 class Solution:
+    cube = {}
+
     tile_sequence = []
     tile_orient = []
     tile_turnover = []
+
+    def __init__(self, cube):
+        '''
+        Constructor
+        :param cube: cube, the solution is tied to
+        '''
+
+        self.cube = cube
 
     # function to check, whether two edges fit into each other
     # pos_edge_1, pos_edge_2 are two 2-tuples with tile-id and
@@ -27,8 +45,8 @@ class Solution:
     # of edge-patterns have to be inverted on one component,
     # before comparison takes place
     def check_edge_compatibility(self, pos_edge_1, pos_edge_2, alt_dir=True):
-        part_id_1 = self.tile_sequence[pos_edge_1[0]]
-        part_id_2 = self.tile_sequence[pos_edge_2[0]]
+        tile_id_1 = self.tile_sequence[pos_edge_1[0]]
+        tile_id_2 = self.tile_sequence[pos_edge_2[0]]
         orient_part_1 = self.tile_orient[pos_edge_1[0]]
         orient_part_2 = self.tile_orient[pos_edge_2[0]]
         turnover_part_1 = self.tile_turnover[pos_edge_1[0]]
@@ -36,19 +54,10 @@ class Solution:
         edge_id_1 = pos_edge_1[1]
         edge_id_2 = pos_edge_2[1]
 
-        if not turnover_part_1:
-            edge_1_pattern = cube[part_id_1][(edge_id_1 + orient_part_1) % 4]
-        else:
-            line_mapping = {0: 0, 1: 3, 2: 2, 3: 1}
-            edge_1_pattern = cube[part_id_1][line_mapping[(edge_id_1 + orient_part_1) % 4]]
-            edge_1_pattern.reverse()
-
-        if not turnover_part_2:
-            edge_2_pattern = cube[part_id_2][(edge_id_2 + orient_part_2) % 4]
-        else:
-            line_mapping = {0: 0, 1: 3, 2: 2, 3: 1}
-            edge_2_pattern = cube[part_id_2][line_mapping[(edge_id_2 + orient_part_2) % 4]]
-            edge_2_pattern.reverse()
+        edge_1_pattern = self.get_cube_line(tile_id=tile_id_1, edge_id=edge_id_1,
+                                            orientation_id=orient_part_1, turnover_id=turnover_part_1)
+        edge_2_pattern = self.get_cube_line(tile_id=tile_id_2, edge_id=edge_id_2,
+                                            orientation_id=orient_part_2, turnover_id=turnover_part_2)
 
         retval = True
         for i in range(5):
@@ -92,7 +101,7 @@ class Solution:
             retval = retval and self.check_edge_compatibility(pos_edge_1=(2, 0), pos_edge_2=(0, 3))
         elif solution_pos_id == 4:
             # check edges between pos 1 and 3
-            retval = self.check_edge_compatibility(pos_edge_1=(1, 2), pos_edge_2=(3, 3))
+            retval = self.check_edge_compatibility(pos_edge_1=(1, 1), pos_edge_2=(3, 3))
             # check edges between pos 0 and 3
             retval = retval and self.check_edge_compatibility(pos_edge_1=(0, 1), pos_edge_2=(3, 0))
         elif solution_pos_id == 5:
@@ -101,16 +110,16 @@ class Solution:
             # check edges between pos 2 and 4
             retval = retval and self.check_edge_compatibility(pos_edge_1=(2, 2), pos_edge_2=(4, 3))
             # check edges between pos 3 and 4
-            retval = retval and self.check_edge_compatibility(pos_edge_1=(3, 2), pos_edge_2=(4, 1))
+            retval = retval and self.check_edge_compatibility(pos_edge_1=(4, 1), pos_edge_2=(3, 2))
         elif solution_pos_id == 6:
             # check edges between pos 4 and 5
             retval = self.check_edge_compatibility(pos_edge_1=(4, 2), pos_edge_2=(5, 0))
             # check edges between pos 5 and 0
             retval = retval and self.check_edge_compatibility(pos_edge_1=(5, 2), pos_edge_2=(0, 0))
             # check edges between pos 5 and 2
-            retval = retval and self.check_edge_compatibility(pos_edge_1=(5, 3), pos_edge_2=(2, 3), alt_dir=False)
+            retval = retval and self.check_edge_compatibility(pos_edge_1=(5, 3), pos_edge_2=(2, 3))
             # check edges between pos 5 and 3
-            retval = retval and self.check_edge_compatibility(pos_edge_1=(5, 1), pos_edge_2=(3, 1), alt_dir=False)
+            retval = retval and self.check_edge_compatibility(pos_edge_1=(5, 1), pos_edge_2=(3, 1))
         return retval
 
     # method to remove the last tile from the solution
@@ -138,6 +147,24 @@ class Solution:
     def is_solved(self):
         return len(self.tile_sequence) == 6
 
+    def get_cube_line(self, tile_id, orientation_id, turnover_id, edge_id):
+        '''
+        return a cube line for a given cube tile, orientation, turnover and edge
+
+        :param cube:
+        :param tile_id:
+        :param orientation_id:
+        :param turnover_id:
+        :param edge_id:
+        :return:
+        '''
+        if not turnover_id:
+            return self.cube[tile_id][(orientation_id + edge_id) % 4]
+        else:
+            line_mapping = {0: 0, 1: 3, 2: 2, 3: 1}
+            line = self.cube[tile_id][line_mapping[(edge_id + orientation_id) % 4]]
+            line = line[::-1]
+            return line
 
 # solve the cube. default the position to be chosen will
 # be position id = 1, where a deliberate tile can be chosen
@@ -170,13 +197,14 @@ def solve_cube(cube, cur_sol: Solution):
     return cur_sol
 
 
-cur_sol = Solution()
+cur_sol = Solution(cube=cube)
 result = solve_cube(cube, cur_sol)
 output = ""
 print(cur_sol.tile_sequence)
 print(cur_sol.tile_orient)
 print(cur_sol.tile_turnover)
 for i in range(len(cur_sol.tile_sequence)):
-    output = output + "Tile {} L{}, ".format(cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
+    front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"
+    output = output + "{}{}/L{}, ".format(front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
 output = output[:-2]
 print(output)
