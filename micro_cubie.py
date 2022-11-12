@@ -55,11 +55,15 @@ while True:
             display.set_pixel(x, y, images[-1].get_pixel(x, y))
             abs_coord = abs_coord + 1 if abs_coord < max_coord else 0
             x, y = calc_coord(abs_coord)
-
+        if pin_logo.is_touched():
+            if images[-1].get_pixel(x, y) == 0:
+                images[-1].set_pixel(x, y, 9)            
+            else:
+                images[-1].set_pixel(x, y, 0)            
         # update cursor
         if time.ticks_diff(time.ticks_ms(), cursor_timestamp) >= cursor_dt:
             cursor_state = not cursor_state            
-            display.set_pixel(x, y, 9 * cursor_state)
+            display.set_pixel(x, y, min(9, 9 * cursor_state + int(images[-1].get_pixel(x, y) * 0.75)))
             cursor_timestamp = time.ticks_ms()
         
             
