@@ -137,7 +137,6 @@ class Solution:
 # to start from
 def solve_cube(cur_sol: Solution):
     # get candidate tiles for future moves
-    # print(cur_sol.tile_sequence)
     cand_tiles = list(set(range(6)).difference(set(cur_sol.tile_sequence)))
     cand_tiles.sort()
     turnovers = list(range(2))
@@ -174,7 +173,6 @@ def calc_coord(abs_coord):
         x = 12 - abs_coord; y = 4
     else:
         x = 0; y = 16 - abs_coord
-    print("x,y:", x,y)
     return (x, y)
 
 def get_image_line(image, line_id):
@@ -213,8 +211,13 @@ def build_cube(images):
                    get_image_line(image, 2), get_image_line(image, 3)]
         cnt = cnt + 1
     return cube
-    
-#display.scroll("* Cube Solver *", delay=40)
+
+def get_solution_string(cur_sol, i):
+    front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"    
+    output = "Pos {}: {}{}/L{}, ".format(i, front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
+    return output
+
+display.scroll("* Cube Solver *", delay=80)
 max_coord = 15
 tile_id = -1
 new_tile = True
@@ -230,7 +233,7 @@ while True:
     if new_tile and tile_id < 5:
         new_tile = False
         tile_id = tile_id + 1
-        display.scroll("Input Tile {}".format(tile_id + 1), delay=40)
+        display.scroll("Input Tile {}".format(tile_id + 1), delay=60)
         # storage for patterns
         images.append(Image())
         display.show(Image('00000:'
@@ -243,15 +246,11 @@ while True:
         x, y = calc_coord(abs_coord)
     elif new_tile:
         # solve loop: Now start solving
-        print("calc cube...")
+        display.scroll("Solving cube...", wait=False)
         cube = build_cube(images)
-        print(cube)
-        print("building solution...")
         cur_sol = Solution(cube)
-        print("solving cube...")
         solve_cube(cur_sol)
-        print("building solution...")
-        print(cur_col)
+        display.scroll("Cube solved!")
         break
     else:
         # handle events
@@ -290,11 +289,12 @@ while True:
 
 
 output = ""
-for i in range(len(cur_sol.tile_sequence)):
-    front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"
-    output = output + "{}{}/L{}, ".format(front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
-output = output[:-2] + " --- "
-display.scroll(output, loop=True)
-
-            
-    
+i = 0
+display.scroll(get_solution_string(cur_sol, i), loop=True, wait=False)
+while True:
+    if button_a.was_pressed():
+        i = max(0, i - 1)
+        display.scroll(get_solution_string(cur_sol, i), loop=True, wait=False)
+    if button_b.was_pressed():
+        i = min(5, i + 1)
+        display.scroll(get_solution_string(cur_sol, i), loop=True, wait=False)
