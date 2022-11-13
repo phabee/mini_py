@@ -214,7 +214,7 @@ def build_cube(images):
 
 def get_solution_string(cur_sol, i):
     front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"    
-    output = "Pos {}: {}{}/L{}, ".format(i + 1, front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
+    output = "Pos {}: {}{}/L{}".format(i + 1, front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
     return output
 
 display.scroll("* Cube Solver *", delay=80)
