@@ -250,7 +250,6 @@ while True:
         cube = build_cube(images)
         cur_sol = Solution(cube)
         solve_cube(cur_sol)
-        display.scroll("Cube solved!")
         break
     else:
         # handle events
@@ -289,8 +288,9 @@ while True:
 
 
 if len(cur_sol.tile_sequence) < 1:
-    display.scroll("No solution found :(   ", delay=80, loop=True)
+    display.scroll("No solution found. ", delay=80, loop=True)
 else:
+    display.scroll("Cube solved!")
     output = ""
     i = 0
     display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
