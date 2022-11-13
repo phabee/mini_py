@@ -214,7 +214,7 @@ def build_cube(images):
 
 def get_solution_string(cur_sol, i):
     front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"    
-    output = "Pos {}: {}{}/L{}".format(i + 1, front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
+    output = "Pos {}: {}{}/L{}".format((i+ 1), front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
     return output
 
 display.scroll("* Cube Solver *", delay=80)
@@ -246,7 +246,7 @@ while True:
         x, y = calc_coord(abs_coord)
     elif new_tile:
         # solve loop: Now start solving
-        display.scroll("Solving...", delay=80)
+        display.scroll("Solving...", wait=False)
         cube = build_cube(images)
         cur_sol = Solution(cube)
         solve_cube(cur_sol)
@@ -288,13 +288,16 @@ while True:
             block_touch = False
 
 
-output = ""
-i = 0
-display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
-while True:
-    if button_a.was_pressed():
-        i = max(0, i - 1)
-        display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
-    if button_b.was_pressed():
-        i = min(5, i + 1)
-        display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+if len(cur_sol.tile_sequence) < 1:
+    display.scroll("No solution found :(   ", delay=80, loop=True)
+else:
+    output = ""
+    i = 0
+    display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+    while True:
+        if button_a.was_pressed():
+            i = max(0, i - 1)
+            display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+        if button_b.was_pressed():
+            i = min(5, i + 1)
+            display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
