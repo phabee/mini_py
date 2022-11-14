@@ -161,7 +161,6 @@ def solve_cube(cur_sol: Solution):
             break
     return cur_sol
 
-
 def calc_coord(abs_coord):
     dim = 5
     x = y = 0
@@ -175,6 +174,9 @@ def calc_coord(abs_coord):
         x = 0; y = 16 - abs_coord
     return (x, y)
 
+# get an image line from the image representing
+# a cube edge in the form of a list containing
+# zeroes and ones.
 def get_image_line(image, line_id):
     line = []
     if line_id == 0:
@@ -212,12 +214,28 @@ def build_cube(images):
         cnt = cnt + 1
     return cube
 
+# generate the output string to describe
+# the solution cur_sol found 
+# 'F' means front orientation of the tiles,
+# 'R' means flipped orientation of the tiles
+# on the vertical axis (so that left / right 
+# sides of the tiles swap positions)
+# pos number indicate the following layout
+# of the cube's net:
+#     1
+#   3 2 4
+#     5
+#     6
 def get_solution_string(cur_sol, i):
     front_back_char = "F" if not cur_sol.tile_turnover[i] else "R"    
     output = "Pos {}: {}{}/L{}".format((i+ 1), front_back_char, cur_sol.tile_sequence[i] + 1, cur_sol.tile_orient[i])
     return output
 
-display.scroll("* Cube Solver *", delay=80)
+#*******************************************************************************
+# main program
+#*******************************************************************************
+
+display_scroll_delay = 60
 max_coord = 15
 tile_id = -1
 new_tile = True
@@ -226,14 +244,17 @@ cursor_dt = 500
 cursor_state = False
 block_touch = False
 both_blocked = False
+# microbit images for tile-definitions
 images = []
+
+display.scroll("* Cube Solver *", delay=display_scroll_delay)
 
 while True:
     # preprare new tile
     if new_tile and tile_id < 5:
         new_tile = False
         tile_id = tile_id + 1
-        display.scroll("Input Tile {}".format(tile_id + 1), delay=80)
+        display.scroll("Input Tile {}".format(tile_id + 1), delay=display_scroll_delay)
         # storage for patterns
         images.append(Image())
         display.show(Image('00000:'
@@ -246,7 +267,7 @@ while True:
         x, y = calc_coord(abs_coord)
     elif new_tile:
         # solve loop: Now start solving
-        display.scroll("Solving...", wait=False)
+        display.scroll("Solving...", delay=display_scroll_delay)
         cube = build_cube(images)
         cur_sol = Solution(cube)
         solve_cube(cur_sol)
@@ -286,18 +307,17 @@ while True:
         else:
             block_touch = False
 
-
 if len(cur_sol.tile_sequence) < 1:
-    display.scroll("No solution found. ", delay=80, loop=True)
+    display.scroll("No solution found. ", delay=display_scroll_delay, loop=True)
 else:
     display.scroll("Cube solved!")
     output = ""
     i = 0
-    display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+    display.scroll(get_solution_string(cur_sol, i), delay=display_scroll_delay, loop=True, wait=False)
     while True:
         if button_a.was_pressed():
             i = max(0, i - 1)
-            display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+            display.scroll(get_solution_string(cur_sol, i), delay=display_scroll_delay, loop=True, wait=False)
         if button_b.was_pressed():
             i = min(5, i + 1)
-            display.scroll(get_solution_string(cur_sol, i), delay=80, loop=True, wait=False)
+            display.scroll(get_solution_string(cur_sol, i), delay=display_scroll_delay, loop=True, wait=False)
